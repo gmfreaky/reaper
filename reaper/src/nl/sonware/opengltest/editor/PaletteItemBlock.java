@@ -5,8 +5,8 @@ import org.lwjgl.opengl.GL11;
 import nl.sonware.opengltest.Point2;
 import nl.sonware.opengltest.Textures;
 import nl.sonware.opengltest.Vector3;
-import nl.sonware.opengltest.blockmap.Block;
 import nl.sonware.opengltest.blockmap.ChunkGrid;
+import nl.sonware.opengltest.blockmap.blocks.Block;
 import nl.sonware.opengltest.world.World;
 
 public class PaletteItemBlock implements PaletteItem{

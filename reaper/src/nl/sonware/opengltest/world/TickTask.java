@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import nl.sonware.opengltest.Vector3;
-import nl.sonware.opengltest.blockmap.Block;
 import nl.sonware.opengltest.blockmap.BlockChange;
+import nl.sonware.opengltest.blockmap.blocks.Block;
 
 public class TickTask implements Runnable{
 

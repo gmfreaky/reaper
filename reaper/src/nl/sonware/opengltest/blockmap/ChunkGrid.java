@@ -2,6 +2,7 @@ package nl.sonware.opengltest.blockmap;
 
 import nl.sonware.opengltest.Camera;
 import nl.sonware.opengltest.Main;
+import nl.sonware.opengltest.blockmap.blocks.Block;
 import nl.sonware.opengltest.util.MathUtils;
 
 import org.lwjgl.opengl.GL11;

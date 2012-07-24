@@ -1,6 +1,6 @@
 package nl.sonware.opengltest.collision;
 
-import nl.sonware.opengltest.blockmap.Block.Face;
+import nl.sonware.opengltest.blockmap.blocks.Block.Face;
 
 public class CollisionData {
 	public Object o;

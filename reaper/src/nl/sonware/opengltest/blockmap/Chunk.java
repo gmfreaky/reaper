@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import nl.sonware.opengltest.Point2;
 import nl.sonware.opengltest.Point3;
 import nl.sonware.opengltest.PolygonData;
+import nl.sonware.opengltest.blockmap.blocks.Block;
 import nl.sonware.opengltest.util.BufferUtils;
 
 import org.lwjgl.opengl.ARBBufferObject;

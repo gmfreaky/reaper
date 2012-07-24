@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import nl.sonware.opengltest.Vector3;
-import nl.sonware.opengltest.blockmap.Block.Face;
+import nl.sonware.opengltest.blockmap.blocks.Block;
+import nl.sonware.opengltest.blockmap.blocks.Block.Face;
 import nl.sonware.opengltest.collision.CollisionData;
 
 public class GridIterator {

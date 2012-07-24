@@ -1,6 +1,7 @@
 package nl.sonware.opengltest.blockmap;
 
 import nl.sonware.opengltest.Vector3;
+import nl.sonware.opengltest.blockmap.blocks.Block;
 
 public class BlockChange {
 	Grid g;

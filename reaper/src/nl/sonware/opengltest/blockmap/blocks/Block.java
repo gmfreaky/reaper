@@ -1,13 +1,14 @@
-package nl.sonware.opengltest.blockmap;
+package nl.sonware.opengltest.blockmap.blocks;
 
 import java.util.ArrayList;
 
 import nl.sonware.opengltest.Point2;
 import nl.sonware.opengltest.Point3;
 import nl.sonware.opengltest.PolygonData;
+import nl.sonware.opengltest.blockmap.Chunk;
 
 
-public enum Block {
+public class Block {
 	DIRT(1, new Point2(0,0), false),
 	GRASS(2, new Point2(0,0), new Point2(2,0),new Point2(1,0),new Point2(1,0),new Point2(1,0),new Point2(1,0), false),
 	STONE(3, new Point2(3,0)),
@@ -24,29 +25,30 @@ public enum Block {
 	TILEGRAY(14, new Point2(14,0)),
 	;
 	int id;
+	
+	public Block() {
+		setTexCoords(new Point2(0,0));
+	}
+	
 	public Point2 texBottom,texTop,texLeft,texRight,texFront,texRear;
-	boolean isTransparent;
+	boolean isTransparent = false;
 	
-	Block(int id) {
-		this(id, new Point2(0,0), false);
-	}
-	Block(int id, Point2 texCoords) {
-		this(id, texCoords, false);
-	}
-	Block(int id, Point2 texCoords, boolean isTransparent) {
-		this(id, texCoords,texCoords,texCoords,texCoords,texCoords,texCoords, isTransparent);
+	public void setTransparent(boolean isTransparent) {
+		this.isTransparent = isTransparent;
 	}
 	
-	private Block(int id, Point2 texBottom, Point2 texTop, Point2 texLeft,
-			Point2 texRight, Point2 texFront, Point2 texRear, boolean isTransparent) {
-		this.id = id;
+	public void setTexCoords(Point2 tex) {
+		setTexCoords(tex, tex, tex, tex, tex, tex);
+	}
+	
+	public void setTexCoords(Point2 texBottom, Point2 texTop, Point2 texLeft,
+			Point2 texRight, Point2 texFront, Point2 texRear) {
 		this.texBottom = texBottom;
 		this.texTop = texTop;
 		this.texLeft = texLeft;
 		this.texRight = texRight;
 		this.texFront = texFront;
 		this.texRear = texRear;
-		this.isTransparent = isTransparent;
 	}
 	
 	public enum Face {
@@ -134,5 +136,4 @@ public enum Block {
 		}
 		return pointList;
 	}
-	
 }
