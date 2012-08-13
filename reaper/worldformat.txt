@@ -1,0 +1,10 @@
+World folder
+	- Properties file .properties
+		- string name
+		- string description
+		- short xSize, ySize, zSize (in chunks)
+	- Folder with chunks
+		- Chunk file chunk_<num>.chunk (<num> = z*(xsize*ysize)+(y*xsize)+x 
+			- short x,y,z (in chunks)
+			- short[4096], blockids (z,y,x, location =z*(xsize*ysize)+(y*xsize)+x)
+			- 

@@ -13,7 +13,7 @@ public class Palette {
 	float width,height;
 	float itemWidth,itemHeight;
 	float itemScale;
-	int xsize=12,ysize=8;
+	int xsize=8,ysize=8;
 	
 	int selectX,selectY;
 	PaletteItem selectedItem;

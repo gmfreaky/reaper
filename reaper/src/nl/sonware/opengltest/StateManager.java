@@ -9,7 +9,7 @@ public class StateManager {
 	public State s;
 	
 	StateManager() {
-		setState(new LevelEditor(16,16,16));
+		setState(new LevelEditor(8,8,8));
 	}
 	
 	public void setState(State s) {

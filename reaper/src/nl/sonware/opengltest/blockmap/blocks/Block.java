@@ -5,43 +5,75 @@ import java.util.ArrayList;
 import nl.sonware.opengltest.Point2;
 import nl.sonware.opengltest.Point3;
 import nl.sonware.opengltest.PolygonData;
+import nl.sonware.opengltest.Vector3;
 import nl.sonware.opengltest.blockmap.Chunk;
 
 
 public class Block {
-	DIRT(1, new Point2(0,0), false),
-	GRASS(2, new Point2(0,0), new Point2(2,0),new Point2(1,0),new Point2(1,0),new Point2(1,0),new Point2(1,0), false),
-	STONE(3, new Point2(3,0)),
-	SAND(4, new Point2(4,0)),
-	WATER(5, new Point2(5,0)),
-	GLASS(6, new Point2(6,0), true),
-	LOG(7, new Point2(7,1), new Point2(7,1), new Point2(7,0), new Point2(7,0), new Point2(7,0), new Point2(7,0), true),
-	WOOD(8, new Point2(8,0)),
-	LEAVES(9, new Point2(9,0), true),
-	IRON(10, new Point2(10,0)),
-	TILEWHITE(11, new Point2(11,0)),
-	TILEBLACK(12, new Point2(12,0)),
-	LAVA(13, new Point2(13,0)),
-	TILEGRAY(14, new Point2(14,0)),
-	;
-	int id;
 	
-	public Block() {
-		setTexCoords(new Point2(0,0));
-	}
-	
+	Chunk chunk;
+	int x,y,z;
 	public Point2 texBottom,texTop,texLeft,texRight,texFront,texRear;
 	boolean isTransparent = false;
+	boolean hasGravity;
 	
-	public void setTransparent(boolean isTransparent) {
+	public Block(Chunk chunk, Vector3 position) {
+		this.chunk = chunk;
+		setTexCoords(new Point2(0,0));
+		setPosition(position);
+	}
+	
+	public BlockList getType() {
+		for(BlockList b:BlockList.values()) {
+			if (b.getType() == getClass()) {
+				return b;
+			}
+		}
+		return null;
+	}
+	
+	public void update() {
+		if (chunk.grid.world.isSimulatingPhysics()) {
+			if (hasGravity) {
+				if (chunk.grid.get(x, y, z-1)==null) {
+					chunk.grid.set(BlockList.AIR, x, y, z);
+					chunk.grid.set(getType(), x, y, z-1);
+				}
+			}
+		}
+	}
+	
+	public void tick() {
+		
+	}
+	
+	void setPosition(int x, int y, int z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+	
+	void setPosition(Vector3 position) {
+		if (position!=null) {
+			this.x = position.getXI();
+			this.y = position.getYI();
+			this.z = position.getZI();
+		}
+	}
+	
+	public Vector3 getPosition() {
+		return new Vector3(x,y,z);
+	}
+	
+	void setTransparent(boolean isTransparent) {
 		this.isTransparent = isTransparent;
 	}
 	
-	public void setTexCoords(Point2 tex) {
+	void setTexCoords(Point2 tex) {
 		setTexCoords(tex, tex, tex, tex, tex, tex);
 	}
 	
-	public void setTexCoords(Point2 texBottom, Point2 texTop, Point2 texLeft,
+	void setTexCoords(Point2 texBottom, Point2 texTop, Point2 texLeft,
 			Point2 texRight, Point2 texFront, Point2 texRear) {
 		this.texBottom = texBottom;
 		this.texTop = texTop;
@@ -68,7 +100,7 @@ public class Block {
 		public int x,y,z;
 	}
 	
-	ArrayList<PolygonData> getVertices(Chunk chunk, int x, int y, int z) {
+	public ArrayList<PolygonData> getVertices() {
 		ArrayList<PolygonData> pointList = new ArrayList<PolygonData>();
 		
 		double tcMul = 1d/16d;
@@ -91,48 +123,52 @@ public class Block {
 		double rearUMul = (texRear.getX()*tcMul);
 		double rearVMul = (texRear.getY()*tcMul);		
 		
-		Block bottomBlock = chunk.getBlock(x, y, z-1);
-		Block topBlock = chunk.getBlock(x, y, z+1);
-		Block leftBlock = chunk.getBlock(x-1, y, z);
-		Block rightBlock = chunk.getBlock(x+1, y, z);
-		Block frontBlock = chunk.getBlock(x, y-1, z);
-		Block rearBlock = chunk.getBlock(x, y+1, z);
+		int rx = x-(chunk.getX()*Chunk.xSize);
+		int ry = y-(chunk.getY()*Chunk.ySize);
+		int rz = z-(chunk.getZ()*Chunk.zSize);
 		
-		if (bottomBlock==null || (bottomBlock.isTransparent && bottomBlock!=this)) { // bottom
-			pointList.add(new PolygonData(new Point3(x,		y+1,z), 	new Point2(botUMul,				botVMul)));
-			pointList.add(new PolygonData(new Point3(x+1,	y+1,z), 	new Point2(botUMul+tcMul,		botVMul)));
-			pointList.add(new PolygonData(new Point3(x+1,	y,	z), 	new Point2(botUMul+tcMul,		botVMul+tcMul)));
-			pointList.add(new PolygonData(new Point3(x,		y,	z), 	new Point2(botUMul,				botVMul+tcMul)));
+		Block bottomBlock = chunk.getBlock(rx, ry, rz-1);
+		Block topBlock = chunk.getBlock(rx, ry, rz+1);
+		Block leftBlock = chunk.getBlock(rx-1, ry, rz);
+		Block rightBlock = chunk.getBlock(rx+1, ry, rz);
+		Block frontBlock = chunk.getBlock(rx, ry-1, rz);
+		Block rearBlock = chunk.getBlock(rx, ry+1, rz);
+		
+		if (bottomBlock==null || (bottomBlock.isTransparent && bottomBlock.getType()!=getType())) { // bottom
+			pointList.add(new PolygonData(new Point3(rx,		ry+1,rz), 	new Point2(botUMul,				botVMul)));
+			pointList.add(new PolygonData(new Point3(rx+1,	ry+1,rz), 	new Point2(botUMul+tcMul,		botVMul)));
+			pointList.add(new PolygonData(new Point3(rx+1,	ry,	rz), 	new Point2(botUMul+tcMul,		botVMul+tcMul)));
+			pointList.add(new PolygonData(new Point3(rx,		ry,	rz), 	new Point2(botUMul,				botVMul+tcMul)));
 		}
-		if (topBlock==null || (topBlock.isTransparent && topBlock!=this)) { // top
-			pointList.add(new PolygonData(new Point3(x,		y,	z+1), 	new Point2(topUMul,				topVMul)));
-			pointList.add(new PolygonData(new Point3(x+1,	y,	z+1), 	new Point2(topUMul+tcMul,		topVMul)));
-			pointList.add(new PolygonData(new Point3(x+1,	y+1,z+1), 	new Point2(topUMul+tcMul,		topVMul+tcMul)));
-			pointList.add(new PolygonData(new Point3(x,		y+1,z+1), 	new Point2(topUMul,				topVMul+tcMul)));
+		if (topBlock==null || (topBlock.isTransparent && topBlock.getType()!=getType())) { // top
+			pointList.add(new PolygonData(new Point3(rx,		ry,	rz+1), 	new Point2(topUMul,				topVMul)));
+			pointList.add(new PolygonData(new Point3(rx+1,	ry,	rz+1), 	new Point2(topUMul+tcMul,		topVMul)));
+			pointList.add(new PolygonData(new Point3(rx+1,	ry+1,rz+1), 	new Point2(topUMul+tcMul,		topVMul+tcMul)));
+			pointList.add(new PolygonData(new Point3(rx,		ry+1,rz+1), 	new Point2(topUMul,				topVMul+tcMul)));
 		}
-		if (leftBlock==null || (leftBlock.isTransparent && leftBlock!=this)) { // left
-			pointList.add(new PolygonData(new Point3(x,y,	z), 		new Point2(leftUMul+tcMul,		leftVMul+tcMul)));
-			pointList.add(new PolygonData(new Point3(x,y,	z+1), 		new Point2(leftUMul+tcMul,		leftVMul)));
-			pointList.add(new PolygonData(new Point3(x,y+1,	z+1), 		new Point2(leftUMul,			leftVMul)));
-			pointList.add(new PolygonData(new Point3(x,y+1,	z), 		new Point2(leftUMul,			leftVMul+tcMul)));
+		if (leftBlock==null || (leftBlock.isTransparent && leftBlock.getType()!=getType())) { // left
+			pointList.add(new PolygonData(new Point3(rx,ry,	rz), 		new Point2(leftUMul+tcMul,		leftVMul+tcMul)));
+			pointList.add(new PolygonData(new Point3(rx,ry,	rz+1), 		new Point2(leftUMul+tcMul,		leftVMul)));
+			pointList.add(new PolygonData(new Point3(rx,ry+1,	rz+1), 		new Point2(leftUMul,			leftVMul)));
+			pointList.add(new PolygonData(new Point3(rx,ry+1,	rz), 		new Point2(leftUMul,			leftVMul+tcMul)));
 		}
-		if (rightBlock==null || (rightBlock.isTransparent && rightBlock!=this)) { // right
-			pointList.add(new PolygonData(new Point3(x+1,y+1,	z), 	new Point2(rightUMul+tcMul,		rightVMul+tcMul)));
-			pointList.add(new PolygonData(new Point3(x+1,y+1,	z+1), 	new Point2(rightUMul+tcMul,		rightVMul)));
-			pointList.add(new PolygonData(new Point3(x+1,y,		z+1), 	new Point2(rightUMul,			rightVMul)));
-			pointList.add(new PolygonData(new Point3(x+1,y,		z), 	new Point2(rightUMul,			rightVMul+tcMul)));
+		if (rightBlock==null || (rightBlock.isTransparent && rightBlock.getType()!=getType())) { // right
+			pointList.add(new PolygonData(new Point3(rx+1,ry+1,	rz), 	new Point2(rightUMul+tcMul,		rightVMul+tcMul)));
+			pointList.add(new PolygonData(new Point3(rx+1,ry+1,	rz+1), 	new Point2(rightUMul+tcMul,		rightVMul)));
+			pointList.add(new PolygonData(new Point3(rx+1,ry,		rz+1), 	new Point2(rightUMul,			rightVMul)));
+			pointList.add(new PolygonData(new Point3(rx+1,ry,		rz), 	new Point2(rightUMul,			rightVMul+tcMul)));
 		}
-		if (frontBlock==null || (frontBlock.isTransparent && frontBlock!=this)) { // front
-			pointList.add(new PolygonData(new Point3(x,		y,	z), 	new Point2(frontUMul,			frontVMul+tcMul)));
-			pointList.add(new PolygonData(new Point3(x+1,	y,	z), 	new Point2(frontUMul+tcMul,		frontVMul+tcMul)));
-			pointList.add(new PolygonData(new Point3(x+1,	y,	z+1), 	new Point2(frontUMul+tcMul,		frontVMul)));
-			pointList.add(new PolygonData(new Point3(x,		y,	z+1), 	new Point2(frontUMul,			frontVMul)));
+		if (frontBlock==null || (frontBlock.isTransparent && frontBlock.getType()!=getType())) { // front
+			pointList.add(new PolygonData(new Point3(rx,		ry,	rz), 	new Point2(frontUMul,			frontVMul+tcMul)));
+			pointList.add(new PolygonData(new Point3(rx+1,	ry,	rz), 	new Point2(frontUMul+tcMul,		frontVMul+tcMul)));
+			pointList.add(new PolygonData(new Point3(rx+1,	ry,	rz+1), 	new Point2(frontUMul+tcMul,		frontVMul)));
+			pointList.add(new PolygonData(new Point3(rx,		ry,	rz+1), 	new Point2(frontUMul,			frontVMul)));
 		}
-		if (rearBlock==null || (rearBlock.isTransparent && rearBlock!=this)) { // rear
-			pointList.add(new PolygonData(new Point3(x,		y+1,z+1),	new Point2(rearUMul+tcMul,		rearVMul)));
-			pointList.add(new PolygonData(new Point3(x+1,	y+1,z+1),	new Point2(rearUMul,			rearVMul)));
-			pointList.add(new PolygonData(new Point3(x+1,	y+1,z), 	new Point2(rearUMul,			rearVMul+tcMul)));
-			pointList.add(new PolygonData(new Point3(x,		y+1,z), 	new Point2(rearUMul+tcMul,		rearVMul+tcMul)));
+		if (rearBlock==null || (rearBlock.isTransparent && rearBlock.getType()!=getType())) { // rear
+			pointList.add(new PolygonData(new Point3(rx,		ry+1,rz+1),	new Point2(rearUMul+tcMul,		rearVMul)));
+			pointList.add(new PolygonData(new Point3(rx+1,	ry+1,rz+1),	new Point2(rearUMul,			rearVMul)));
+			pointList.add(new PolygonData(new Point3(rx+1,	ry+1,rz), 	new Point2(rearUMul,			rearVMul+tcMul)));
+			pointList.add(new PolygonData(new Point3(rx,		ry+1,rz), 	new Point2(rearUMul+tcMul,		rearVMul+tcMul)));
 		}
 		return pointList;
 	}

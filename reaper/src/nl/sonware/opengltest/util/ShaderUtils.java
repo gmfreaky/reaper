@@ -1,4 +1,4 @@
-package nl.sonware.opengltest;
+package nl.sonware.opengltest.util;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

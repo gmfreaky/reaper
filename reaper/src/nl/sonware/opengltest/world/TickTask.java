@@ -1,16 +1,15 @@
 package nl.sonware.opengltest.world;
 
-import java.util.ArrayList;
 import java.util.Random;
 
-import nl.sonware.opengltest.Vector3;
-import nl.sonware.opengltest.blockmap.BlockChange;
+import nl.sonware.opengltest.blockmap.Chunk;
 import nl.sonware.opengltest.blockmap.blocks.Block;
 
 public class TickTask implements Runnable{
 
 	World w;
 	boolean finished;
+	Random random = new Random();
 	TickTask(World w) {
 		this.w=w;
 	}
@@ -18,65 +17,32 @@ public class TickTask implements Runnable{
 	@Override
 	public void run() {
 		while(!finished) {
-			
-			long startTime = System.currentTimeMillis();
 			tick();
-			System.out.println("Tick took "+(System.currentTimeMillis()-startTime)+" milliseconds");
-			
 			try {
-				Thread.sleep(100);
+				Thread.sleep(10);  // sleep 10 milliseconds for a total of 100 ticks per second
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				finished = true;
+				break;
 			}
 		}
 	}
-	
 	public void tick() {
-		
-		ArrayList<BlockChange> changeList = new ArrayList<BlockChange>();
-		
-		Random r = new Random();
-		for(int xx=0;xx<w.getGrid().getxSize();xx++)
-		for(int yy=0;yy<w.getGrid().getySize();yy++)
-		for(int zz=0;zz<w.getGrid().getzSize();zz++) {
-			if (w.getGrid().get(xx, yy, zz)==Block.LEAVES) {
-				int surroundingLeaves = w.getGrid().getBlockCountRadius(xx,yy,zz,2,Block.LEAVES);
-				int surroundingLogs = w.getGrid().getBlockCountRadius(xx,yy,zz,2,Block.LOG);
-				
-				if (surroundingLogs==0) {
-					changeList.add(new BlockChange(new Vector3(xx,yy,zz),w.getGrid(),null));
-				}
-				
-				int spreadChance = (surroundingLeaves*10)/(surroundingLogs+1);
-				if (r.nextInt(spreadChance+1)==0 && surroundingLogs>surroundingLeaves/10) {
-					int xLoc=0,yLoc=0,zLoc=0;
-					int direction = r.nextInt(6);
-					switch(direction) {
-						case 0:xLoc=-1; break;
-						case 1:yLoc=-1; break;
-						case 2:zLoc=-1; break;
-						case 3:xLoc=1; break;
-						case 4:yLoc=1; break;
-						case 5:zLoc=1; break;
-					}
-					
-					if (w.isPlaceFree(new Vector3(xx+xLoc,yy+yLoc,zz+zLoc))) {
-						changeList.add(
-								new BlockChange(
-										new Vector3(xx+xLoc, yy+yLoc, zz+zLoc),
-										w.getGrid(),
-										Block.LEAVES));
+		for(int xx=0;xx<w.getGrid().xSize;xx++)
+		for(int yy=0;yy<w.getGrid().ySize;yy++)
+		for(int zz=0;zz<w.getGrid().zSize;zz++) {
+			Chunk c = w.getGrid().getChunk(xx, yy, zz);
+			if (c!=null) {
+				for (int i=0;i<5;i++) {// tick 5 random blocks per chunk
+					int ux = random.nextInt(Chunk.xSize);
+					int uy = random.nextInt(Chunk.ySize);
+					int uz = random.nextInt(Chunk.zSize);
+					Block tickBlock = c.getBlock(ux, uy, uz);
+					if (tickBlock!=null) {
+						tickBlock.tick();
 					}
 				}
 			}
 		}
-		
-		for(BlockChange b:changeList) {
-			b.execute();
-		}
-	}
-	
-	public void stop() {
-		finished = true;
+			
 	}
 }

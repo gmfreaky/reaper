@@ -124,4 +124,8 @@ public class Vector3 {
 	public String toString() {
 		return "Vector3("+getX()+","+getY()+","+getZ()+")";
 	}
+
+	public Vector3 div(double division) {
+		return this.mul(1/division);
+	}
 }

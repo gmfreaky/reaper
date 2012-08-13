@@ -2,8 +2,11 @@ package nl.sonware.opengltest.world;
 
 import java.util.ArrayList;
 import java.util.Collections;
+
 import nl.sonware.opengltest.Camera;
+import nl.sonware.opengltest.Color;
 import nl.sonware.opengltest.KeyboardInterface;
+import nl.sonware.opengltest.Main;
 import nl.sonware.opengltest.State;
 import nl.sonware.opengltest.Textures;
 import nl.sonware.opengltest.Vector3;
@@ -14,6 +17,7 @@ import nl.sonware.opengltest.world.entity.Entity;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.Sphere;
 
 public class World implements State, KeyboardInterface{
 
@@ -25,14 +29,17 @@ public class World implements State, KeyboardInterface{
 	public float lastTick;
 	boolean debugging;
 	Thread tickThread;
+	Sphere sun = new Sphere();
 	
 	public World(int xSize, int ySize, int zSize) {
 		entityList = new ArrayList<Entity>();
-		grid = new ChunkGrid(xSize,ySize,zSize);
+		grid = new ChunkGrid(this, xSize,ySize,zSize);
 		
 		tickThread = new Thread(new TickTask(this));
 		tickThread.start();
 		tickThread.setPriority(Thread.MAX_PRIORITY);
+		
+		Main.fogColor = new Color(0.5f,0.7f,1f);
 	}
 	
 	public ChunkGrid getGrid() {
@@ -109,13 +116,15 @@ public class World implements State, KeyboardInterface{
 
 	@Override
 	public void render() {
-		GL11.glEnable(GL11.GL_FOG);
-		
+		GL11.glDisable(GL11.GL_FOG);
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		// skybox
 		GL11.glColor3f(1, 1, 1);
 
 		Textures.bindTexture(0);
 		Textures.bindTexture(Textures.terrain);
-				
+		GL11.glEnable(GL11.GL_FOG);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		getGrid().render(renderCamera);
 		if (entityList!=null) {
 			for(Entity e:entityList) {

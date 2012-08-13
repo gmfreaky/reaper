@@ -7,19 +7,21 @@ import nl.sonware.opengltest.Textures;
 import nl.sonware.opengltest.Vector3;
 import nl.sonware.opengltest.blockmap.ChunkGrid;
 import nl.sonware.opengltest.blockmap.blocks.Block;
+import nl.sonware.opengltest.blockmap.blocks.BlockList;
 import nl.sonware.opengltest.world.World;
 
 public class PaletteItemBlock implements PaletteItem{
 	Block b;
-	public PaletteItemBlock(Block b) {
-		this.b = b;
+	
+	public PaletteItemBlock(BlockList b) {
+		this.b = b.newInstance(null, null);
 	}
 	
 	@Override
 	public void paint(World w, Vector3 position, Vector3 rotation) {
 		ChunkGrid g = w.getGrid();
 		if (w.isPlaceFree(position)) {
-			g.set(b, position.getXI(), position.getYI(), position.getZI());
+			g.set(b.getType(), position.getXI(), position.getYI(), position.getZI());
 		}
 	}
 

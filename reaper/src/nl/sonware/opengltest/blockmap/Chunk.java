@@ -1,10 +1,13 @@
 package nl.sonware.opengltest.blockmap;
 
 import java.util.ArrayList;
+
 import nl.sonware.opengltest.Point2;
 import nl.sonware.opengltest.Point3;
 import nl.sonware.opengltest.PolygonData;
+import nl.sonware.opengltest.Vector3;
 import nl.sonware.opengltest.blockmap.blocks.Block;
+import nl.sonware.opengltest.blockmap.blocks.BlockList;
 import nl.sonware.opengltest.util.BufferUtils;
 
 import org.lwjgl.opengl.ARBBufferObject;
@@ -13,8 +16,10 @@ import org.lwjgl.opengl.GL11;
 
 public class Chunk {
 	
-	ChunkGrid grid;
-	int x,y,z;
+	public ChunkGrid grid;
+	private int x;
+	int y;
+	int z;
 	
 	int vertexBuffer, texCoordBuffer;
 	Block blockArray[][][];
@@ -43,7 +48,6 @@ public class Chunk {
 		ArrayList<Point3> vertexData = new ArrayList<Point3>();
 		ArrayList<Point2> texCoordData = new ArrayList<Point2>();
 
-		
 		for(int zz=0;zz<zSize;zz++)
 		for(int yy=0;yy<ySize;yy++)
 		for(int xx=0;xx<xSize;xx++)
@@ -51,14 +55,13 @@ public class Chunk {
 			Block b = getBlock(xx,yy,zz);
 			if (b!=null) {
 				
-				ArrayList<PolygonData> dataList = b.getVertices(this, xx, yy, zz);
+				ArrayList<PolygonData> dataList = b.getVertices();
 				for(PolygonData d:dataList) {
 					vertexData.add(d.vertexData);
 					texCoordData.add(d.texCoordData);
 				}
 			}
 		}
-		
 		
 		// Get vertexdata and texcoorddata from polygondata
 
@@ -89,10 +92,9 @@ public class Chunk {
 			
 			ARBBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, texCoordBuffer); // texcoord-array in de buffer stoppen
 			ARBBufferObject.glBufferDataARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, BufferUtils.wrapDirectDouble(texCoordArray), ARBBufferObject.GL_DYNAMIC_DRAW_ARB);
-			
-			ARBBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, 0); // Unbind buffer
 		}
 		
+		ARBBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, 0); // Unbind buffer
 	}
 	
 	boolean insideGrid(int x, int y, int z) {
@@ -110,18 +112,21 @@ public class Chunk {
 		}
 	}
 	
-	public void setBlock(Block b, int x, int y, int z) {
+	public void setBlock(BlockList b, int x, int y, int z) {
 		if (insideGrid(x,y,z)) {
-			blockArray[x][y][z] = b;
+			if (b!=null && b!=BlockList.AIR)
+			blockArray[x][y][z] = b.newInstance(this, new Vector3(this.getX()*getxSize()+x,this.y*getySize()+y,this.z*getzSize()+z));
+			else
+			blockArray[x][y][z] = null;
 			
 			markDirty();
 			
-			if (x==0) 		{Chunk c = grid.getChunk(this.x-1, this.y, 		this.z); 	if (c!=null)c.isDirty = true;}
-			if (x==xSize-1) {Chunk c = grid.getChunk(this.x+1, this.y, 		this.z); 	if (c!=null)c.isDirty = true;}
-			if (y==0) 		{Chunk c = grid.getChunk(this.x, 	this.y-1, 	this.z); 	if (c!=null)c.isDirty = true;}
-			if (y==ySize-1) {Chunk c = grid.getChunk(this.x, 	this.y+1, 	this.z); 	if (c!=null)c.isDirty = true;}
-			if (z==0) 		{Chunk c = grid.getChunk(this.x, 	this.y, 	this.z-1); 	if (c!=null)c.isDirty = true;}
-			if (z==zSize-1) {Chunk c = grid.getChunk(this.x, 	this.y, 	this.z+1); 	if (c!=null)c.isDirty = true;}
+			if (x==0) 		{Chunk c = grid.getChunk(this.getX()-1, this.y, 		this.z); 	if (c!=null)c.isDirty = true;}
+			if (x==xSize-1) {Chunk c = grid.getChunk(this.getX()+1, this.y, 		this.z); 	if (c!=null)c.isDirty = true;}
+			if (y==0) 		{Chunk c = grid.getChunk(this.getX(), 	this.y-1, 	this.z); 	if (c!=null)c.isDirty = true;}
+			if (y==ySize-1) {Chunk c = grid.getChunk(this.getX(), 	this.y+1, 	this.z); 	if (c!=null)c.isDirty = true;}
+			if (z==0) 		{Chunk c = grid.getChunk(this.getX(), 	this.y, 	this.z-1); 	if (c!=null)c.isDirty = true;}
+			if (z==zSize-1) {Chunk c = grid.getChunk(this.getX(), 	this.y, 	this.z+1); 	if (c!=null)c.isDirty = true;}
 		}
 	}
 	
@@ -155,6 +160,8 @@ public class Chunk {
 			markClean();
 		}
 		
+		if (polygonCount==0) {return;}
+		
 		GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
 		GL11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
 
@@ -162,16 +169,27 @@ public class Chunk {
 			GL11.glVertexPointer(3, GL11.GL_INT, 0,0); // make pointer to vertexbuffer
 			ARBBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, texCoordBuffer); // bind texcoordbuffer
 			GL11.glTexCoordPointer(2, GL11.GL_DOUBLE, 0,0); // make pointer to texcoordbuffer
-			ARBBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, 0); // reset buffer
 			
 				GL11.glDrawArrays(GL11.GL_QUADS, 0, polygonCount); // render arrays
 		
 		GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
 		GL11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
+		
+		ARBBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, 0); // reset buffer
 	}
 	
 	@Override
 	public String toString() {
-		return "Chunk("+x+","+y+","+z+")";
+		return "Chunk("+getX()+","+y+","+z+")";
+	}
+
+	public int getX() {
+		return x;
+	}
+	public int getY() {
+		return y;
+	}
+	public int getZ() {
+		return z;
 	}
 }
