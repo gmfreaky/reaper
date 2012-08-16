@@ -35,7 +35,7 @@ public class Main {
 	static boolean finished = false;
 	public static float width = 1024;
 	public static float height = 768;
-	static boolean fullscreen = false;
+	static boolean fullscreen = true;
 
 	public static float renderDist = 100; // 100 meters renderdistance
 	public static Color fogColor = new Color(0.4f, 0.65f, 1f, 1);
@@ -232,8 +232,8 @@ public class Main {
 	
 	public static void renderSceneFromFBO() {
 		
-		//Shaders.post_bloom.bind();
-		Shaders.post_pass.bind();
+		Shaders.post_bloom.bind();
+		//Shaders.post_pass.bind();
 		ARBShaderObjects.glUniform1fARB(timerID, time);
 		
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, renderTexture);
