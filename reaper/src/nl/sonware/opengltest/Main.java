@@ -35,7 +35,7 @@ public class Main {
 	static boolean finished = false;
 	public static float width = 1024;
 	public static float height = 768;
-	static boolean fullscreen = true;
+	static boolean fullscreen = false;
 
 	public static float renderDist = 100; // 100 meters renderdistance
 	public static Color fogColor = new Color(0.4f, 0.65f, 1f, 1);
