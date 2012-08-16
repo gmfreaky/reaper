@@ -37,10 +37,10 @@ public class PaletteItemEntity implements PaletteItem {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glPushMatrix();
-		GL11.glRotated(-60, 1, 0, 0);
-		GL11.glRotated(45, 0, 0, 1);
+		GL11.glRotated(60, 1, 0, 0);
+		GL11.glRotated(45*3, 0, 0, 1);
 		GL11.glRotated(180, 0, 1, 0);
-		GL11.glScaled(20, 20, 20);
+		GL11.glScaled(-22, 22, 22);
 			e.model.render();
 		GL11.glPopMatrix();
 		GL11.glDisable(GL11.GL_DEPTH_TEST);

@@ -17,7 +17,7 @@ public class Palette {
 	
 	int selectX,selectY;
 	PaletteItem selectedItem;
-	int selectedItemX,selectedItemY;
+	int selectedItemX=0,selectedItemY=ysize;
 	
 	PaletteItem[][] itemList;
 	
@@ -31,7 +31,7 @@ public class Palette {
 	}
 	
 	public boolean addItem(PaletteItem i) {
-		for(int yy=0;yy<ysize;yy++)
+		for(int yy=ysize-1;yy>=0;yy--)
 		for(int xx=0;xx<xsize;xx++) {
 			if (itemList[xx][yy]==null) {
 				itemList[xx][yy] = i;
@@ -43,7 +43,7 @@ public class Palette {
 	
 	public void update() {
 		float mX = Mouse.getX()-x;
-		float mY = (Display.getDisplayMode().getHeight()-Mouse.getY())-y;
+		float mY = Mouse.getY()-y;
 		
 		selectX = (int) Math.floor(mX/itemWidth);
 		selectY = (int) Math.floor(mY/itemHeight);
@@ -82,7 +82,7 @@ public class Palette {
 		for(int xx=0;xx<xsize;xx++)
 		for(int yy=0;yy<ysize;yy++) {
 			GL11.glPushMatrix();
-			GL11.glTranslatef(x+(xx*itemWidth)+(itemWidth/2), y+(yy*itemHeight)+(itemHeight/2), 0);
+			GL11.glTranslatef(x+(xx*itemWidth)+(itemWidth/2), (y+(yy*itemHeight)+(itemHeight/2)), 0);
 			
 			Textures.bindTexture(0);
 			GL11.glColor4f(0,0,0,0.5f);

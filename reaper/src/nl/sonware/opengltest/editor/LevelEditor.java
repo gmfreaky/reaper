@@ -84,27 +84,6 @@ public class LevelEditor extends World implements KeyboardInterface, MouseInterf
 		placeTimer-=delta;
 		
 		if (!showPalette) {
-			GridIterator iterator = new GridIterator(getGrid(), camera.getPosition(), camera.getLookat(), reach);
-			ArrayList<CollisionData> collisionList = iterator.getList();
-			if (collisionList.size()>0) {
-				selectedBlock = collisionList.get(0);
-			} else {
-				selectedBlock = null;
-			}
-			
-			ArrayList<Entity> entityCollisionList = getEntitiesRay(camera.getPosition(),camera.getLookat(), reach, null);
-			if (!entityCollisionList.isEmpty()) {
-				Entity hit = entityCollisionList.get(0);
-				double currentDist=0, newDist=0;
-				if (selectedBlock!=null) {
-					Vector3 currentSelection = new Vector3(selectedBlock.x+0.5, selectedBlock.y+0.5, selectedBlock.z+0.5);
-					Vector3 newSelection = hit.getPosition();
-					currentDist = currentSelection.sub(camera.getPosition()).getLengthSq();
-					newDist = newSelection.sub(camera.getPosition()).getLengthSq();
-				}
-				if (selectedBlock==null || newDist<currentDist) // if object is closer than block
-				selectedBlock = new CollisionData(hit,Face.TOP,hit.getPosition().getXI(),hit.getPosition().getYI(),hit.getPosition().getZI());
-			}
 			
 			if (selectedBlock!=null) {
 				if (placeTimer<=0 && Mouse.isButtonDown(1)) { // placing blocks
@@ -134,6 +113,28 @@ public class LevelEditor extends World implements KeyboardInterface, MouseInterf
 			}
 			if (!Mouse.isButtonDown(1)){
 				placeTimer=0;
+			}
+			
+			GridIterator iterator = new GridIterator(getGrid(), camera.getPosition(), camera.getLookat(), reach);
+			ArrayList<CollisionData> collisionList = iterator.getList();
+			if (collisionList.size()>0) {
+				selectedBlock = collisionList.get(0);
+			} else {
+				selectedBlock = null;
+			}
+			
+			ArrayList<Entity> entityCollisionList = getEntitiesRay(camera.getPosition(),camera.getLookat(), reach, null);
+			if (!entityCollisionList.isEmpty()) {
+				Entity hit = entityCollisionList.get(0);
+				double currentDist=0, newDist=0;
+				if (selectedBlock!=null) {
+					Vector3 currentSelection = new Vector3(selectedBlock.x+0.5, selectedBlock.y+0.5, selectedBlock.z+0.5);
+					Vector3 newSelection = hit.getPosition();
+					currentDist = currentSelection.sub(camera.getPosition()).getLengthSq();
+					newDist = newSelection.sub(camera.getPosition()).getLengthSq();
+				}
+				if (selectedBlock==null || newDist<currentDist) // if object is closer than block
+				selectedBlock = new CollisionData(hit,Face.TOP,hit.getPosition().getXI(),hit.getPosition().getYI(),hit.getPosition().getZI());
 			}
 		}
 		if (showPalette) {

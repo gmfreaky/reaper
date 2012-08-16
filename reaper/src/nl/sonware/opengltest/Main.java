@@ -213,7 +213,7 @@ public class Main {
 		GL11.glLoadIdentity();
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
-		GL11.glOrtho(0, width, height, 0, 100, -100);
+		GL11.glOrtho(0, width, 0, height, 100, -100);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 
 		GL11.glDisable(GL11.GL_CULL_FACE);
@@ -232,8 +232,8 @@ public class Main {
 	
 	public static void renderSceneFromFBO() {
 		
-		Shaders.post_bloom.bind();
-		//Shaders.post_pass.bind();
+		//Shaders.post_bloom.bind();
+		Shaders.post_pass.bind();
 		ARBShaderObjects.glUniform1fARB(timerID, time);
 		
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, renderTexture);

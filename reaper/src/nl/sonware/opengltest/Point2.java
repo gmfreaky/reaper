@@ -36,6 +36,14 @@ public class Point2 implements Cloneable{
 		this.y = y;
 	}
 	
+	public Point2 mul(Point2 point) {
+		return new Point2(x*point.x,y*point.y);
+	}
+	
+	public Point2 add(Point2 point) {
+		return new Point2(x+point.x,y+point.y);
+	}
+	
 	@Override
 	public Point2 clone() {
 		return new Point2(x,y);

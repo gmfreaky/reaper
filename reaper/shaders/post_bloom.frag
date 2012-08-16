@@ -8,11 +8,11 @@ void main()
 	int j;
 	int i;
 	
-	for( i= -4 ;i < 4; i++)
+	for( i= -3 ;i < 3; i++)
 	{
-		for (j = -4; j < 4; j++)
+		for (j = -3; j < 3; j++)
 		{
-			sum += texture2D(fbo_texture, texcoord + vec2(j, i)*0.004) * 0.15;
+			sum += texture2D(fbo_texture, texcoord + vec2(j, i)*0.004) * 0.25;
 		}
 	} 
 	if (texture2D(fbo_texture, texcoord).r < 0.3)

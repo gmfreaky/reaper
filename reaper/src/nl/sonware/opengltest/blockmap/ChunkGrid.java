@@ -153,9 +153,10 @@ public class ChunkGrid implements Grid{
 		
 		int count=0;
 		
-		for(int x=xx-radius;x<xx+radius;x++)
+		
+		for(int z=zz-radius;z<zz+radius;z++)
 		for(int y=yy-radius;y<yy+radius;y++)
-		for(int z=zz-radius;z<zz+radius;z++) {
+		for(int x=xx-radius;x<xx+radius;x++){
 			Object get = get(x,y,z);
 
 			if ((get==null && blockType==BlockList.AIR) || (get!=null && ((Block) get).getType()==blockType)) {

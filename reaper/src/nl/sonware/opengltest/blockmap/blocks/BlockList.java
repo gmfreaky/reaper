@@ -22,6 +22,7 @@ public enum BlockList {
 	TILEBLACK(BlockTileBlack.class),
 	LAVA(BlockLava.class),
 	TILEGRAY(BlockTileGray.class),
+	ICE(BlockIce.class),
 	;
 	
 	Class<? extends Block> c;

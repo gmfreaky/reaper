@@ -20,9 +20,11 @@ public class EntityConveyorBelt extends Entity {
 	
 	public void update(float delta) {
 		super.update(delta);
-		float xCoord = 1-(w.getTimer()/1000)%0.5f;
-		((BoxModel) model).getBox("top").textureCoordinatesTop1 = new Point2(xCoord,0); 
-		((BoxModel) model).getBox("top").textureCoordinatesTop2 = new Point2(xCoord+0.5f,0.5f);
+		if (model!=null) {
+			float xCoord = 1-(w.getTimer()/1000)%0.5f;
+			((BoxModel) model).getBox("top").textureCoordinatesTop1 = new Point2(xCoord,0); 
+			((BoxModel) model).getBox("top").textureCoordinatesTop2 = new Point2(xCoord+0.5f,0.5f);
+		}
 	}
 
 }
