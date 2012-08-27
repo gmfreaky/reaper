@@ -1,7 +1,12 @@
 package nl.sonware.opengltest.blockmap;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
 import nl.sonware.opengltest.Camera;
 import nl.sonware.opengltest.Main;
+import nl.sonware.opengltest.Vector3;
 import nl.sonware.opengltest.blockmap.blocks.Block;
 import nl.sonware.opengltest.blockmap.blocks.BlockList;
 import nl.sonware.opengltest.util.MathUtils;
@@ -13,6 +18,8 @@ public class ChunkGrid implements Grid{
 	public int xSize, ySize, zSize;
 	public World world;
 	Chunk[][][] chunkArray;
+	Vector3 lastPos;
+	ArrayList<Chunk> renderList = new ArrayList<Chunk>();
 	
 	public ChunkGrid(World world, int xSize, int ySize, int zSize) {
 		
@@ -26,7 +33,7 @@ public class ChunkGrid implements Grid{
 		for(int x=0;x<xSize;x++)
 		for(int y=0;y<ySize;y++)
 		for(int z=0;z<zSize;z++) {
-			chunkArray[x][y][z] = new Chunk(this,x,y,z);
+			addChunk(x, y, z);
 		}
 	}
 	
@@ -80,7 +87,23 @@ public class ChunkGrid implements Grid{
 		if (b7!=null){b7.update();}
 	}
 	
-	public Chunk getChunk(int x, int y, int z) { // Get chunk by index
+	public void addChunk(int x, int y, int z) { // Add chunk by coordinates
+		
+		if (insideGrid(x,y,z) && getChunk(x,y,z)==null) {
+			Chunk nc = new Chunk(this, x, y, z);
+			chunkArray[x][y][z] = nc;
+			renderList.add(nc);
+		}
+	}
+	
+	public void removeChunk(int x, int y, int z) { // Add chunk by coordinates
+		if (insideGrid(x,y,z) && getChunk(x,y,z)!=null) {
+			renderList.remove(getChunk(x,y,z));
+			chunkArray[x][y][z] = null;
+		}
+	}
+	
+	public Chunk getChunk(int x, int y, int z) { // Get chunk by coordinates
 		if (insideGrid(x,y,z)) {
 			return chunkArray[x][y][z];
 		}
@@ -96,28 +119,83 @@ public class ChunkGrid implements Grid{
 		return getChunk(cX,cY,cZ);
 	}
 	
-	public void render(Camera cam) {
+	public void render(final Camera cam) {
+		
+		boolean sortChunks = false;
+		
+		Vector3 camPos = cam.getPosition();
+		boolean camInNewChunk = true;
+		if (lastPos!=null) {
+			camInNewChunk = (lastPos.getXI()/16)!=(camPos.getXI()/16) || (lastPos.getYI()/16)!=(camPos.getYI()/16) || (lastPos.getZI()/16)!=(camPos.getZI()/16);
+		}
+		if(camInNewChunk) {
+			sortChunks = true;
+		}
+		lastPos = cam.getPosition();
+		
 		GL11.glEnable(GL11.GL_ALPHA_TEST);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glAlphaFunc(GL11.GL_NOTEQUAL, 0);
 		
-		for(int x=0;x<xSize;x++)
-		for(int y=0;y<ySize;y++)
-		for(int z=0;z<zSize;z++) {
-			float cX = (x+0.5f)*Chunk.xSize;
-			float cY = (y+0.5f)*Chunk.ySize;
-			float cZ = (z+0.5f)*Chunk.zSize;
+		class CompareChunk implements Comparator<Chunk> {
+
+			@Override
+			public int compare(Chunk a, Chunk b) {
+				Vector3 camPos = cam.getPosition();
+				double distA = MathUtils.distSq(a.x, a.y, a.z, camPos.getXF(), camPos.getYF(),camPos.getZF());
+				double distB = MathUtils.distSq(b.x, b.y, b.z, camPos.getXF(), camPos.getYF(),camPos.getZF());
+				if (distA<distB) {return -1;}
+				else if (distA>distB) {return 1;}
+				else {return 0;}
+			} 
+		}
+		
+		if (sortChunks) {
+			Collections.sort(renderList, new CompareChunk());
+		}
+		
+		for(Chunk chunk:renderList) {
+			Vector3 chunkToCam = chunk.getPositionCenter().sub(camPos);
 			
-			if (MathUtils.distSq(cX, cY, cZ, cam.getPosition().getXF(), cam.getPosition().getYF(), cam.getPosition().getZF())<Math.pow(Main.renderDist+Chunk.xSize,2)) {
-				Chunk rc = getChunk(x,y,z);
-				if (rc!=null) {
+			if (chunkToCam.getLengthSq()<Math.pow(Main.renderDist+Chunk.xSize,2)) { // if chunk is within renderdistance
+				Vector3 toCam1 = chunk.getPositionCorner(0,0,0).sub(camPos);
+				Vector3 toCam2 = chunk.getPositionCorner(0,0,1).sub(camPos);
+				Vector3 toCam3 = chunk.getPositionCorner(0,1,0).sub(camPos);
+				Vector3 toCam4 = chunk.getPositionCorner(0,1,1).sub(camPos);
+				Vector3 toCam5 = chunk.getPositionCorner(1,0,0).sub(camPos);
+				Vector3 toCam6 = chunk.getPositionCorner(1,0,1).sub(camPos);
+				Vector3 toCam7 = chunk.getPositionCorner(1,1,0).sub(camPos);
+				Vector3 toCam8 = chunk.getPositionCorner(1,1,1).sub(camPos);
+				
+				toCam1.normalize();
+				toCam2.normalize();
+				toCam3.normalize();
+				toCam4.normalize();
+				toCam5.normalize();
+				toCam6.normalize();
+				toCam7.normalize();
+				toCam8.normalize();
+				
+				Vector3 camVec = cam.getLookat().sub(cam.getPosition());
+				camVec.normalize();
+				
+				double dot1 = toCam1.dot(camVec);
+				double dot2 = toCam2.dot(camVec);
+				double dot3 = toCam3.dot(camVec);
+				double dot4 = toCam4.dot(camVec);
+				double dot5 = toCam5.dot(camVec);
+				double dot6 = toCam6.dot(camVec);
+				double dot7 = toCam7.dot(camVec);
+				double dot8 = toCam8.dot(camVec);
+				
+				if (dot1>0 || dot2>0 || dot3>0 || dot4>0 || dot5>0 || dot6>0 || dot7>0 || dot8>0) {// if chunk is not behind camera
 					GL11.glPushMatrix();
-					GL11.glTranslatef(x*Chunk.xSize, y*Chunk.ySize, z*Chunk.zSize);
-						rc.render(); // render chunk
+					GL11.glTranslatef(chunk.x*Chunk.xSize, chunk.y*Chunk.ySize, chunk.z*Chunk.zSize);
+						chunk.render();
 					GL11.glPopMatrix();
 				}
 			}
-		}		
+		}
 	}
 	
 	boolean insideGrid(int x, int y, int z) {

@@ -39,7 +39,7 @@ public class World implements State, KeyboardInterface{
 		tickThread.start();
 		tickThread.setPriority(Thread.MAX_PRIORITY);
 		
-		Main.fogColor = new Color(0.5f,0.7f,1f);
+		Main.fogColor = new Color(0.39f/1.2f,0.55f/1.2f,1f/1.2f);
 	}
 	
 	public ChunkGrid getGrid() {

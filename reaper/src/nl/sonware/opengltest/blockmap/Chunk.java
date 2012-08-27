@@ -1,6 +1,7 @@
 package nl.sonware.opengltest.blockmap;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import nl.sonware.opengltest.Point2;
 import nl.sonware.opengltest.Point3;
@@ -17,7 +18,7 @@ import org.lwjgl.opengl.GL11;
 public class Chunk {
 	
 	public ChunkGrid grid;
-	private int x;
+	int x;
 	int y;
 	int z;
 	
@@ -48,9 +49,9 @@ public class Chunk {
 		ArrayList<Point3> vertexData = new ArrayList<Point3>();
 		ArrayList<Point2> texCoordData = new ArrayList<Point2>();
 
-		for(int zz=0;zz<zSize;zz++)
-		for(int yy=0;yy<ySize;yy++)
 		for(int xx=0;xx<xSize;xx++)
+		for(int yy=0;yy<ySize;yy++)
+		for(int zz=0;zz<zSize;zz++)
 		{
 			Block b = getBlock(xx,yy,zz);
 			if (b!=null) {
@@ -115,7 +116,7 @@ public class Chunk {
 	public void setBlock(BlockList b, int x, int y, int z) {
 		if (insideGrid(x,y,z)) {
 			if (b!=null && b!=BlockList.AIR)
-			blockArray[x][y][z] = b.newInstance(this, new Vector3(this.getX()*getxSize()+x,this.y*getySize()+y,this.z*getzSize()+z));
+			blockArray[x][y][z] = b.newInstance(this, new Vector3(this.getX()*getXSize()+x,this.y*getYSize()+y,this.z*getZSize()+z));
 			else
 			blockArray[x][y][z] = null;
 			
@@ -130,15 +131,15 @@ public class Chunk {
 		}
 	}
 	
-	public int getxSize() {
+	public static int getXSize() {
 		return xSize;
 	}
 
-	public int getySize() {
+	public static int getYSize() {
 		return ySize;
 	}
 
-	public int getzSize() {
+	public static int getZSize() {
 		return zSize;
 	}
 	
@@ -181,6 +182,28 @@ public class Chunk {
 	@Override
 	public String toString() {
 		return "Chunk("+getX()+","+y+","+z+")";
+	}
+	
+	public Vector3 getPosition() {
+		return new Vector3(getWorldX(),getWorldY(),getWorldZ());
+	}
+	public Vector3 getPositionCenter() {
+		return new Vector3(getWorldX()+(double)Chunk.getXSize()/2d,getWorldY()+(double)Chunk.getYSize()/2d,getWorldZ()+(double)Chunk.getZSize()/2d);
+	}
+	public Vector3 getPositionCorner(int xc, int yc, int zc) {
+		return new Vector3(getWorldX()+(xc*Chunk.getXSize()),getWorldY()+(yc*Chunk.getYSize()),getWorldZ()+(zc*Chunk.getZSize()));
+	}
+	
+	public int getWorldX() {
+		return x*Chunk.getXSize();
+	}
+	
+	public int getWorldY() {
+		return y*Chunk.getYSize();
+	}
+
+	public int getWorldZ() {
+		return z*Chunk.getZSize();
 	}
 
 	public int getX() {

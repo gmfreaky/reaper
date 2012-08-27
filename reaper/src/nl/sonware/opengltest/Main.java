@@ -9,10 +9,13 @@ import static org.lwjgl.opengl.EXTFramebufferObject.glFramebufferRenderbufferEXT
 import static org.lwjgl.opengl.EXTFramebufferObject.glGenRenderbuffersEXT;
 import static org.lwjgl.opengl.EXTFramebufferObject.glRenderbufferStorageEXT;
 
+import java.io.ObjectInputStream.GetField;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import nl.sonware.opengltest.shader.Shaders;
 import nl.sonware.opengltest.util.BufferUtils;
+import nl.sonware.opengltest.util.Text;
+import nl.sonware.opengltest.world.World;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -37,7 +40,7 @@ public class Main {
 	public static float height = 768;
 	static boolean fullscreen = false;
 
-	public static float renderDist = 100; // 100 meters renderdistance
+	public static float renderDist = 200; // 100 meters renderdistance
 	public static Color fogColor = new Color(0.4f, 0.65f, 1f, 1);
 
 	static long lastTime = System.currentTimeMillis();
@@ -76,7 +79,7 @@ public class Main {
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
-
+		
 		init();
 
 		while (!finished) {
@@ -224,16 +227,23 @@ public class Main {
 		
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		
+		Text.render("Reaper Alpha 0.01", 4, Display.getHeight()-20, 16);
+		
 		// Render overlay
 		manager.renderOverlay();
 
+		Display.sync(60);
 		Display.update();
 	}
 	
 	public static void renderSceneFromFBO() {
 		
-		Shaders.post_bloom.bind();
-		//Shaders.post_pass.bind();
+		if (manager.s instanceof World && (((World)(manager.s)).isDebugging())) {
+			Shaders.post_pass.bind();
+		}
+		else {
+			Shaders.post_bloom.bind();
+		}
 		ARBShaderObjects.glUniform1fARB(timerID, time);
 		
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, renderTexture);

@@ -11,7 +11,9 @@ public enum BlockList {
 	DIRT(BlockDirt.class),
 	GRASS(BlockGrass.class),
 	STONE(BlockStone.class),
+	BRIGHTSTONE(BlockStoneBright.class),
 	SAND(BlockSand.class),
+	DUST(BlockDust.class),
 	WATER(BlockWater.class),
 	GLASS(BlockGlass.class),
 	LOG(BlockLog.class),
@@ -23,6 +25,10 @@ public enum BlockList {
 	LAVA(BlockLava.class),
 	TILEGRAY(BlockTileGray.class),
 	ICE(BlockIce.class),
+	GRATEWHITE(BlockGrateWhite.class),
+	GRATEBLACK(BlockGrateBlack.class),
+	BLOCKBRICKSTONE(BlockBrickStone.class),
+	BLOCKBRICKRED(BlockBrickRed.class),
 	;
 	
 	Class<? extends Block> c;

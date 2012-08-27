@@ -76,8 +76,8 @@ public class FlyCamera implements Camera{
 		speedVec = speedVec.div(1+(friction*delta));
 		
 		if (Mouse.isGrabbed()) {
-			yaw += (Mouse.getDX())/500f;
-			pitch += (Mouse.getDY())/500f;
+			yaw += ((Mouse.getDX())/600f);
+			pitch += ((Mouse.getDY())/600f);
 		}
 		
 		pitch = Math.max(Math.min(pitch,Math.PI/2-0.001f),-Math.PI/2+0.001f);

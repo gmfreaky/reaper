@@ -15,7 +15,7 @@ public class Block {
 	int x,y,z;
 	public Point2 texBottom,texTop,texLeft,texRight,texFront,texRear;
 	boolean isTransparent = false;
-	boolean hasGravity;
+	boolean hasGravity = false;
 	
 	public Block(Chunk chunk, Vector3 position) {
 		this.chunk = chunk;

@@ -2,7 +2,6 @@ package nl.sonware.opengltest.editor;
 
 import java.util.ArrayList;
 
-import nl.sonware.opengltest.Color;
 import nl.sonware.opengltest.FlyCamera;
 import nl.sonware.opengltest.KeyboardInterface;
 import nl.sonware.opengltest.Main;
@@ -14,6 +13,8 @@ import nl.sonware.opengltest.blockmap.blocks.Block;
 import nl.sonware.opengltest.blockmap.blocks.Block.Face;
 import nl.sonware.opengltest.blockmap.blocks.BlockList;
 import nl.sonware.opengltest.collision.CollisionData;
+import nl.sonware.opengltest.gui.Gui;
+import nl.sonware.opengltest.gui.GuiButton;
 import nl.sonware.opengltest.util.DrawUtils;
 import nl.sonware.opengltest.util.DrawUtils.Cube;
 import nl.sonware.opengltest.world.World;
@@ -38,8 +39,9 @@ public class LevelEditor extends World implements KeyboardInterface, MouseInterf
 	
 	int reach = 100;
 	
+	Gui gui;
 	Palette palette;
-	boolean showPalette;
+	boolean showGui;
 	
 	public LevelEditor(int xSize, int ySize, int zSize) {
 		super(xSize, ySize, zSize);
@@ -56,15 +58,28 @@ public class LevelEditor extends World implements KeyboardInterface, MouseInterf
 		camera.setRotation(new Vector3(mX,mY,mZ));
 		
 		for(int x=0;x<getGrid().getxSize();x++)
-		for(int y=0;y<getGrid().getySize();y++)
-		for(int z=0;z<getGrid().getzSize()/2;z++) {
-			getGrid().set(BlockList.WATER, x, y, z);
+		for(int y=0;y<getGrid().getySize();y++)	{
+			getGrid().set(BlockList.STONE, x, y, 0);
 		}
 		
 		float pWidth = Display.getWidth()/2;
 		float pHeight = Display.getHeight()/2;
+
+		enableSimulatePhysics(false);
 		
-		palette = new Palette((Display.getWidth()/2)-(pWidth/2f),(Display.getHeight()/2)-(pHeight/2f),pWidth,pHeight);
+		gui = new Gui();
+		gui.addElement("button_new", new GuiButton(gui, 0,Display.getHeight()-64-(24*0),128, "New"));
+		gui.addElement("button_load", new GuiButton(gui, 0,Display.getHeight()-64-(24*1),128, "Load"));
+		gui.addElement("button_save", new GuiButton(gui, 0,Display.getHeight()-64-(24*2),128, "Save"));
+		gui.addElement("button_saveas", new GuiButton(gui, 0,Display.getHeight()-64-(24*3),128, "Save as"));
+		gui.addElement("button_properties", new GuiButton(gui, 0,(24*0),128, "Properties"));
+		gui.addElement("button_publish", new GuiButton(gui, 0,(24*1),128, "Publish..."));
+		
+		gui.addElement("button_menu", new GuiButton(gui, Display.getWidth()-128,(24*0),128, "Main menu"));
+		
+		palette = new Palette(gui, (Display.getWidth()/2)-(pWidth/2f),(Display.getHeight()/2)-(pHeight/2f),pWidth,pHeight);
+		gui.addElement("palette", palette);
+		
 		for(BlockList b:BlockList.values()) {
 			if (b.getType()!=null)
 			palette.addItem(new PaletteItemBlock(b));
@@ -72,18 +87,20 @@ public class LevelEditor extends World implements KeyboardInterface, MouseInterf
 		for (EEntity e:EEntity.values()) {
 			palette.addItem(new PaletteItemEntity(e));
 		}
-		
-		enableSimulatePhysics(false);
 	}
 	
 	public void update(float delta) {
 		super.update(delta);
 		camera.update(delta);
 		
+		if (showGui) {
+			gui.update(delta);
+		}
+		
 		deleteTimer-=delta;
 		placeTimer-=delta;
 		
-		if (!showPalette) {
+		if (!showGui) {
 			
 			if (selectedBlock!=null) {
 				if (placeTimer<=0 && Mouse.isButtonDown(1)) { // placing blocks
@@ -137,9 +154,6 @@ public class LevelEditor extends World implements KeyboardInterface, MouseInterf
 				selectedBlock = new CollisionData(hit,Face.TOP,hit.getPosition().getXI(),hit.getPosition().getYI(),hit.getPosition().getZI());
 			}
 		}
-		if (showPalette) {
-			palette.update();
-		}
 	}
 
 	@Override
@@ -147,12 +161,12 @@ public class LevelEditor extends World implements KeyboardInterface, MouseInterf
 		super.onKeyboard();
 		if (Keyboard.getEventKeyState() && !Keyboard.isRepeatEvent()) {
 			if (Keyboard.getEventKey()==Keyboard.KEY_E) {
-				if (!showPalette) {
+				if (!showGui) {
 					Mouse.setGrabbed(false);
-					showPalette = true;
+					showGui = true;
 				} else {
 					Mouse.setGrabbed(true);
-					showPalette = false;
+					showGui = false;
 				}
 			}
 		}
@@ -164,7 +178,7 @@ public class LevelEditor extends World implements KeyboardInterface, MouseInterf
 	public void onMouse() {
 		if (Mouse.getEventButtonState()) {
 			if (Mouse.getEventButton()==0) {
-				if (showPalette) {
+				if (showGui) {
 					palette.selectBlock();
 					if (palette.getSelectedItem()!=null) {
 						brush = palette.getSelectedItem();
@@ -211,8 +225,8 @@ public class LevelEditor extends World implements KeyboardInterface, MouseInterf
 		DrawUtils.drawSpriteCentered(Textures.crosshair, Main.width/2, Main.height/2, 16, 16);
 		
 		// editor gui
-		if (showPalette) {
-			palette.render();
+		if (showGui) {
+			gui.render();
 		}
 	}
 }

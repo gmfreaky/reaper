@@ -1,38 +1,37 @@
 package nl.sonware.opengltest.editor;
 
 import nl.sonware.opengltest.Textures;
+import nl.sonware.opengltest.gui.Gui;
+import nl.sonware.opengltest.gui.GuiElement;
 import nl.sonware.opengltest.util.DrawUtils;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
-public class Palette {
+public class Palette extends GuiElement{
 	
-	float x,y;
-	float width,height;
 	float itemWidth,itemHeight;
 	float itemScale;
-	int xsize=8,ysize=8;
+	int xItems=8,yItems=8;
 	
 	int selectX,selectY;
 	PaletteItem selectedItem;
-	int selectedItemX=0,selectedItemY=ysize;
+	int selectedItemX=0,selectedItemY=yItems;
 	
 	PaletteItem[][] itemList;
 	
-	public Palette(float x, float y, float width, float height) {
-		this.x=x;
-		this.y=y;
+	public Palette(Gui gui, float x, float y, float width, float height) {
+		super(gui, x, y);
 		setSize(width,height);
 		itemScale = ((width+height)/2)/500;
 		
-		itemList = new PaletteItem[xsize][ysize];
+		itemList = new PaletteItem[xItems][yItems];
 	}
 	
 	public boolean addItem(PaletteItem i) {
-		for(int yy=ysize-1;yy>=0;yy--)
-		for(int xx=0;xx<xsize;xx++) {
+		for(int yy=yItems-1;yy>=0;yy--)
+		for(int xx=0;xx<xItems;xx++) {
 			if (itemList[xx][yy]==null) {
 				itemList[xx][yy] = i;
 				return true;
@@ -41,7 +40,8 @@ public class Palette {
 		return false;
 	}
 	
-	public void update() {
+	public void update(float delta) {
+		super.update(delta);
 		float mX = Mouse.getX()-x;
 		float mY = Mouse.getY()-y;
 		
@@ -50,7 +50,7 @@ public class Palette {
 	}
 	
 	public boolean inPalette(int x, int y) {
-		return (x>=0 && x<xsize && y>=0 && y<ysize);
+		return (x>=0 && x<xItems && y>=0 && y<yItems);
 	}
 	
 	public void selectBlock() {
@@ -64,10 +64,10 @@ public class Palette {
 	}
 	
 	public void setSize(float width,float height) {
-		this.width = width;
-		this.height = height;
-		itemWidth = width/xsize;
-		itemHeight = height/ysize;
+		this.xSize = width;
+		this.ySize = height;
+		itemWidth = width/xItems;
+		itemHeight = height/yItems;
 	}
 	
 	public PaletteItem getSelectedItem() {
@@ -75,12 +75,13 @@ public class Palette {
 	}
 	
 	public void render() {
+		super.render();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		GL11.glColor4f(0,0,0,0.5f);
-		DrawUtils.drawRectangle(x,y,width,height);
+		DrawUtils.drawRectangle(x,y,xSize,ySize);
 		
-		for(int xx=0;xx<xsize;xx++)
-		for(int yy=0;yy<ysize;yy++) {
+		for(int xx=0;xx<xItems;xx++)
+		for(int yy=0;yy<yItems;yy++) {
 			GL11.glPushMatrix();
 			GL11.glTranslatef(x+(xx*itemWidth)+(itemWidth/2), (y+(yy*itemHeight)+(itemHeight/2)), 0);
 			
